@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Login - Prueba de Seguridad</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #d3d3d3;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 13px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"] {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #1de9b6;
+        }
+        
+        button {
+            width: auto;
+            padding: 12px 30px;
+            background: #1de9b6;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            display: block;
+            margin: 0 auto;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .error {
+            color: #d32f2f;
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
+        }
+        
+        .info {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #666;
+            border-left: 4px solid #1de9b6;
+        }
+        
+        .success-page {
+            display: none;
+            text-align: center;
+        }
+        
+        .success-page h2 {
+            color: #4caf50;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        
+        .success-box {
+            background: #f1f8f4;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #4caf50;
+        }
+        
+        .success-box p {
+            margin: 10px 0;
+            color: #333;
+            font-size: 16px;
+        }
+        
+        .label-highlight {
+            font-weight: bold;
+            color: #1de9b6;
+        }
+        
+        .reset-btn {
+            background: #757575;
+            margin-top: 20px;
+        }
+        
+        .reset-btn:hover {
+            background: #616161;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #1de9b6;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="loginForm">
+            <h1>Demo Login</h1>
+            <p class="subtitle">Prueba de Seguridad - Ataque de Fuerza Bruta</p>
+            
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="username">Usuario:</label>
+                    <input 
+                        type="text" 
+                        id="username" 
+                        name="username" 
+                        placeholder="admin" 
+                        value="admin"
+                        readonly
+                    >
+                </div>
+                <div class="form-group">
+                    <label for="password">Contraseña (5 caracteres):</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        placeholder="Ingresa la contraseña" 
+                        required
+                    >
+                </div>
+                <button type="submit" id="submitBtn">Verificar</button>
+            </form>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+            </div>
+            
+            <div id="errorMsg" class="error"></div>
+            
+            
+        </div>
+        
+        <div id="successPage" class="success-page">
+            <h2>✅ ¡Contraseña Correcta!</h2>
+            
+            <div class="success-box">
+                <p><span class="label-highlight">Contraseña encontrada:</span></p>
+                <p style="font-size: 20px; color: #4caf50; font-weight: bold;" id="foundPassword"></p>
+            </div>
+            
+            <div class="success-box">
+                <p><span class="label-highlight">Tiempo del ataque:</span></p>
+                <p id="attackTime" style="font-size: 18px;"></p>
+            </div>
+            
+            <button class="reset-btn" onclick="resetForm()">Reintentar</button>
+        </div>
+    </div>
+
+    <script>
+        let startTime = null;
+
+        async function handleLogin(event) {
+            event.preventDefault();
+
+            if (startTime === null) {
+                startTime = Date.now();
+            }
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorMsg = document.getElementById('errorMsg');
+            const loading = document.getElementById('loading');
+            const submitBtn = document.getElementById('submitBtn');
+
+            errorMsg.textContent = '';
+            loading.style.display = 'block';
+            submitBtn.disabled = true;
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    loading.style.display = 'none';
+                    showSuccess(data.password);
+                } else {
+                    errorMsg.textContent = '❌ ' + data.message;
+                    document.getElementById('password').value = '';
+                    document.getElementById('password').focus();
+                    loading.style.display = 'none';
+                    submitBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                errorMsg.textContent = '❌ Error en la conexión con el servidor';
+                loading.style.display = 'none';
+                submitBtn.disabled = false;
+            }
+        }
+
+        function showSuccess(password) {
+            const endTime = Date.now();
+            const elapsedTime = (endTime - startTime) / 1000;
+
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('successPage').style.display = 'block';
+
+            document.getElementById('foundPassword').textContent = password;
+            document.getElementById('attackTime').textContent = elapsedTime.toFixed(2) + ' segundos';
+        }
+
+        function resetForm() {
+            startTime = null;
+            document.getElementById('password').value = '';
+            document.getElementById('errorMsg').textContent = '';
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('successPage').style.display = 'none';
+            document.getElementById('submitBtn').disabled = false;
+            document.getElementById('password').focus();
+        }
+    </script>
+</body>
+</html>
